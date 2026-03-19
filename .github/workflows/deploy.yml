@@ -1,23 +1,35 @@
-name: Deploy to GitHub Pages
+name: Docker Build and Deploy
 
 on:
   push:
     branches:
-      - main   # 如果你是 master 就改成 master
+      - main
 
 permissions:
-  contents: write   # 🔥 必须有
+  contents: write
 
 jobs:
-  deploy:
+  build-and-deploy:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Deploy to GitHub Pages
+      # 🐳 构建 Docker 镜像
+      - name: Build Docker Image
+        run: docker build -t my-app .
+
+      # 🐳 运行容器并导出文件
+      - name: Extract build files
+        run: |
+          docker create --name temp-container my-app
+          docker cp temp-container:/output ./dist
+          docker rm temp-container
+
+      # 🚀 部署到 GitHub Pages
+      - name: Deploy
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: .
+          publish_dir: ./dist

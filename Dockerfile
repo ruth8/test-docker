@@ -1,6 +1,9 @@
-FROM nginx:alpine
+FROM node:18-alpine
 
-COPY . /usr/share/nginx/html
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+WORKDIR /app
 
-EXPOSE 80
+COPY . .
+
+RUN npm install || true
+
+CMD ["sh", "-c", "cp -r . /output"]
